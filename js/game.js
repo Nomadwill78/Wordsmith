@@ -106,9 +106,17 @@ export class Game {
     this.roomsCleared = 0;  // rooms finished by typing (crossing auto-solves are not counted)
     this.recorded = false;  // result already saved to the local score list
     this.lastDelta = null;  // last HP loss the player took: { kind: "mistake" | "strike", n }
+    this.eventKind = "info"; // hit | hurt | solve | boss | info, used to colour the Chronicle log
+    this.eventSeq = 0;      // goes up on every new event so the UI can log each one once
+    this.flashKey = null;   // grid square that just took a wrong letter
     this.status = "playing"; // playing | descend | dead | demo_complete
     this.startFloor(1);
     this.onChange = onChange; // attach after setup so the UI never sees a half-built game
+  }
+  ev(text, kind) { this.event = text; this.eventKind = kind; this.eventSeq++; }
+  monsterName(id) {
+    const r = this.rooms[id], nrng = mulberry32(hashStr(this.seed + ":" + this.floor + ":" + id));
+    return r.answer[0] + r.answer.slice(1).toLowerCase() + " " + (r.isBoss ? "Tyrant" : TITLES[randInt(nrng, 0, TITLES.length - 1)]);
   }
   cells(id) { const r = this.rooms[id]; return [...r.answer].map((_, i) => key(r.x + r.dx * i, r.y + r.dy * i)); }
   get boss() { return this.rooms[this.bossId]; }
@@ -121,7 +129,7 @@ export class Game {
     this.boss.state = "sealed";
     for (const k of this.cells(this.bossId)) for (const r of this.grid.get(k).rooms) if (r !== this.bossId) this.rooms[r].state = "open";
     this.sel = -1; this.fight = null; this.kill = null; this.status = "playing";
-    this.event = `Floor ${n}. Break the seal: solve ${this.needed()} of ${this.rooms.length - 1} rooms.`;
+    this.ev(`Floor ${n}. Break the seal: solve ${this.needed()} of ${this.rooms.length - 1} rooms.`, "info");
     this.cycle(1);
   }
 
@@ -132,8 +140,7 @@ export class Game {
     this.sel = id; this.cursor = 0; this.advance();
     if (!this.fight || this.fight.id !== id) {
       const len = r.answer.length, max = r.isBoss ? Math.ceil(len * RULES.MONSTER_HP_PER_LETTER * RULES.BOSS_HP_MULT) : len * RULES.MONSTER_HP_PER_LETTER;
-      const nrng = mulberry32(hashStr(this.seed + ":" + this.floor + ":" + id));
-      const name = r.answer[0] + r.answer.slice(1).toLowerCase() + " " + (r.isBoss ? "Tyrant" : TITLES[randInt(nrng, 0, TITLES.length - 1)]);
+      const name = this.monsterName(id);
       this.fight = { id, len, max, hp: r.monsterHp ?? max, streak: 0, mistakes: 0, boss: r.isBoss, name,
         attack: Math.ceil(len / 2) + (r.isBoss ? RULES.BOSS_ATTACK_BONUS : 0) };
     }
@@ -155,19 +162,20 @@ export class Game {
       cell.revealed = true; f.streak++;
       let dmg = 1 + f.streak; if (this.combo >= RULES.COMBO_THRESHOLD) dmg = Math.ceil(dmg * RULES.COMBO_MULT);
       f.hp = Math.max(f.hp - dmg, 0); this.ink += RULES.INK_PER_LETTER;
-      this.event = `You hit ${f.name} for ${dmg}. It has ${f.hp}/${f.max} HP left.`;
+      this.ev(`You hit ${f.name} for ${dmg}. It has ${f.hp}/${f.max} HP left.`, "hit");
       this.cursor++; this.advance();
       if (this.cursor >= cs.length) this.complete();
     } else {
       f.streak = 0; f.mistakes++; this.mistakes++; this.combo = 0;
       this.lastDelta = { kind: "mistake", n: RULES.WRONG_LETTER_COST };
+      this.flashKey = cs[this.cursor];
       this.hurt(RULES.WRONG_LETTER_COST);
-      if (this.status === "playing") this.event = `Mistake: wrong letter, -${RULES.WRONG_LETTER_COST} HP. Streak lost.`;
+      if (this.status === "playing") this.ev(`Mistake: wrong letter, -${RULES.WRONG_LETTER_COST} HP. Streak lost.`, "hurt");
     }
     this.onChange();
   }
 
-  hurt(n) { this.hp = Math.max(this.hp - n, 0); if (this.hp === 0) { this.status = "dead"; this.event = `You fell on floor ${this.floor}.`; } }
+  hurt(n) { this.hp = Math.max(this.hp - n, 0); if (this.hp === 0) { this.status = "dead"; this.ev(`You fell on floor ${this.floor}.`, "hurt"); } }
 
   complete() {
     const f = this.fight;
@@ -187,12 +195,12 @@ export class Game {
     if (perfect) { this.combo++; this.cleanRooms++; this.ink += RULES.INK_PERFECT_BONUS; }
     const strikeText = strike > 0 ? `Enemy strike: ${f.name} was still alive when you finished, so it hits you for -${strike} HP.` : "";
     const perfectText = perfect ? `Perfect! +${RULES.INK_PERFECT_BONUS} Ink.` : "";
-    this.event = [strikeText, perfectText].filter(Boolean).join(" ") || "Monster defeated.";
+    this.ev([strikeText, perfectText].filter(Boolean).join(" ") || "Monster defeated.", strike > 0 ? "hurt" : "solve");
     this.fight = null;
     this.solve(this.sel);
     if (this.boss.state === "solved") {
-      if (this.floor >= RULES.DEMO_FLOORS) { this.status = "demo_complete"; this.event = `Demo complete. ${this.kill.name} slain at 0/${this.kill.max} HP.`; }
-      else { this.status = "descend"; this.event = `Boss slain: ${this.kill.name} at 0/${this.kill.max} HP. Descend to heal ${RULES.FLOOR_HEAL} HP.`; }
+      if (this.floor >= RULES.DEMO_FLOORS) { this.status = "demo_complete"; this.ev(`Demo complete. ${this.kill.name} slain at 0/${this.kill.max} HP.`, "boss"); }
+      else { this.status = "descend"; this.ev(`Boss slain: ${this.kill.name} at 0/${this.kill.max} HP. Descend to heal ${RULES.FLOOR_HEAL} HP.`, "boss"); }
     } else this.cycle(1);
   }
 
@@ -205,7 +213,7 @@ export class Game {
         this.solve(r.id);
       }
     if (this.boss.state === "sealed" && this.solvedNonBoss() >= this.needed()) {
-      this.boss.state = "open"; this.event = `The seal breaks. The ${this.boss.answer[0] + this.boss.answer.slice(1).toLowerCase()} Tyrant awaits.`;
+      this.boss.state = "open"; this.ev(`The seal breaks. The ${this.boss.answer[0] + this.boss.answer.slice(1).toLowerCase()} Tyrant awaits.`, "boss");
     }
   }
 

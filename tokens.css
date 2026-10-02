@@ -1,0 +1,14 @@
+/* Wordsmith's Gambit redesign tokens (colours, fonts, radii). Loaded after style.css. */
+:root{
+  --crypt-900:#0e0b14; --crypt-800:#130f1b; --crypt-700:#16121f; --panel:#1b1726; --panel-2:#221c31; --panel-3:#241f33;
+  --stone:#231e30; --stone-line:#352e48; --key-line:#3a3350;
+  --vellum:#4a3f6b; --vellum-2:#7a6aa8; --lilac:#a89bc4; --lilac-2:#cfc4ea; --muted:#8a7fa3;
+  --parchment:#efe4cc; --parchment-hi:#f4ead3; --parchment-lo:#e3d4b2; --parchment-edge:#b89c6a; --ink:#2a2033;
+  --gilt:#d9a441; --gilt-hi:#f6d27a; --gilt-2:#f0c96a; --gilt-lo:#b07f2c; --gilt-edge:#9c7226; --gilt-ink:#2a1a08;
+  --wax:#b8352d; --wax-hi:#e0645a; --wax-deep:#4a1a1d; --wax-edge:#8a2b27; --blood:#d0453a; --blood-soft:#f08a7f;
+  --ember:#e8803a;
+  --line-gold:rgba(217,164,65,.18);
+  --font-display:'IM Fell English SC',serif; --font-italic:'IM Fell English',serif;
+  --font-tile:'Spectral',serif; --font-ui:'Instrument Sans',sans-serif; --font-mono:'JetBrains Mono',monospace;
+  --r-tile:8px; --r-key:8px; --r-btn:10px; --r-stat:12px; --r-panel:18px; --r-board:20px;
+}

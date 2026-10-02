@@ -29,7 +29,7 @@ function updateDaily() {
   const day = new Date(today + "T00:00:00Z").toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric", timeZone: "UTC" });
   $("demo-date").textContent = `${day} (UTC) · same floor for everyone worldwide`;
   const dailyEl = $("h-daily");
-  dailyEl.innerHTML = `Daily <span class="long">floor </span>${today} UTC · resets <span class="long">00:00 UTC, </span>${escapeHtml(local)}<span class="long"> for you · in ${left}</span>`;
+  dailyEl.innerHTML = `Daily <span class="long">floor </span>${today} UTC · resets ${escapeHtml(local)}<span class="long"> (in ${left})</span>`;
   dailyEl.setAttribute("aria-label", `Daily floor ${today}, UTC. It resets at 00:00 UTC, which is ${local} for you, in ${left}.`);
 }
 updateDaily();
@@ -67,7 +67,7 @@ async function boot() {
 function newGame() {
   demoStarted = false;
   $("h-delta").hidden = true;
-  lastSel = -2; lastCursorKey = "";
+  lastSel = -2; lastCursorKey = ""; log = []; lastSeq = -1; flash = null;
   game = new Game(bank, "daily-" + today, render);
   render();
 }
@@ -81,9 +81,10 @@ function setHint(show) {
 }
 $("hint-close").addEventListener("click", () => { setHint(false); $("game").focus({ preventScroll: true }); });
 $("hint-open").addEventListener("click", () => { setHint(true); $("game").focus({ preventScroll: true }); });
+$("restart").addEventListener("click", () => { newGame(); $("game").focus({ preventScroll: true }); });
 
 // ---------- Rendering ----------
-let cellEls = new Map(), builtFloor = 0, demoStarted = false, deltaTimer, lastSel = -2, lastCursorKey = "";
+let cellEls = new Map(), chEls = new Map(), roomEls = [], log = [], lastSeq = -1, flash = null, flashTimer, builtFloor = 0, demoStarted = false, deltaTimer, lastSel = -2, lastCursorKey = "";
 function startDemo() {
   ensureVisible();
   // On phones the hint folds away at the first keystroke so the board gets the space (rule chips stay visible).
@@ -100,9 +101,12 @@ function ensureVisible() {
 function buildBoard() {
   const b = $("board");
   b.innerHTML = "";
-  cellEls = new Map();
+  cellEls = new Map(); chEls = new Map();
   b.style.setProperty("--cols", game.cols);
   b.style.setProperty("--rows", game.rows);
+  // Each room's first square carries the room number printed on the tile.
+  const starts = new Map();
+  game.rooms.forEach((r) => { const k = game.cells(r.id)[0]; if (!starts.has(k)) starts.set(k, r.id + 1); });
   for (const [k] of game.grid) {
     const [x, y] = k.split(",").map(Number);
     const el = document.createElement("button");
@@ -112,11 +116,64 @@ function buildBoard() {
     el.type = "button";
     el.dataset.k = k;
     el.tabIndex = -1;
+    const num = document.createElement("span"), ch = document.createElement("span");
+    num.className = "num"; ch.className = "ch";
+    num.setAttribute("aria-hidden", "true"); ch.setAttribute("aria-hidden", "true");
+    if (starts.has(k)) num.textContent = starts.get(k);
+    el.append(num, ch);
     el.addEventListener("click", (e) => clickCell(k, e.detail === 0));
     b.appendChild(el);
     cellEls.set(k, el);
+    chEls.set(k, ch);
   }
+  buildRooms();
   builtFloor = game.floor;
+}
+
+// Rooms panel: one row per word, built once per floor and updated in place.
+function buildRooms() {
+  const ul = $("rooms");
+  ul.innerHTML = "";
+  roomEls = game.rooms.map((r) => {
+    const li = document.createElement("li"), btn = document.createElement("button");
+    btn.type = "button"; btn.className = "room-row";
+    btn.innerHTML = '<i class="dot" aria-hidden="true"></i><span><span class="rn"></span><span class="rs"><b></b> · <span class="rd"></span></span></span>';
+    btn.querySelector(".rn").textContent = game.monsterName(r.id);
+    btn.querySelector(".rd").textContent = `${r.dx ? "Across" : "Down"} · ${r.answer.length}`;
+    btn.addEventListener("click", () => { if (game.rooms[r.id].state === "open") { game.select(r.id); $("game").focus({ preventScroll: true }); } });
+    li.appendChild(btn); ul.appendChild(li);
+    return btn;
+  });
+}
+
+function updateRooms(playing) {
+  game.rooms.forEach((r, i) => {
+    const btn = roomEls[i];
+    const active = playing && game.sel === r.id;
+    const st = active ? "fighting" : r.state === "solved" ? "solved" : r.state === "sealed" ? "sealed" : r.state === "open" ? (r.isBoss ? "awake" : "open") : "locked";
+    btn.dataset.st = st;
+    btn.classList.toggle("is-active", active);
+    btn.disabled = r.state !== "open" || !playing;
+    if (active) btn.setAttribute("aria-current", "true"); else btn.removeAttribute("aria-current");
+    btn.querySelector("b").textContent = st;
+  });
+}
+
+// Chronicle: the last seven events, newest first, fading with age.
+function updateChronicle() {
+  if (game.eventSeq === lastSeq) return;
+  lastSeq = game.eventSeq;
+  log.unshift({ t: game.event, k: game.eventKind });
+  log = log.slice(0, 7);
+  const ol = $("chronicle");
+  ol.innerHTML = "";
+  log.forEach((e, i) => {
+    const li = document.createElement("li"), star = document.createElement("span"), txt = document.createElement("span");
+    li.dataset.k = e.k; li.style.opacity = Math.max(0.35, 1 - i * 0.12);
+    star.textContent = "✦"; star.setAttribute("aria-hidden", "true");
+    txt.textContent = e.t;
+    li.append(star, txt); ol.appendChild(li);
+  });
 }
 
 function clickCell(k, fromKeyboard) {
@@ -163,10 +220,23 @@ function render() {
   const roomCells = game.rooms.map((_, i) => game.cells(i));
   const selCells = game.sel >= 0 ? roomCells[game.sel] : [];
   const curKey = playing && game.sel >= 0 ? selCells[game.cursor] : undefined;
+  const bossSel = playing && game.sel >= 0 && game.rooms[game.sel].isBoss;
+  if (game.flashKey) { // wrong letter: flash the square for 380ms
+    flash = { k: game.flashKey, until: performance.now() + 380 };
+    game.flashKey = null;
+    clearTimeout(flashTimer);
+    flashTimer = setTimeout(render, 400);
+  }
+  const flashing = flash && performance.now() < flash.until ? flash.k : null;
   for (const [k, el] of cellEls) {
-    const i = selCells.indexOf(k);
-    el.className = "cell " + game.cellClass(k) + (i >= 0 && playing ? " sel" : "") + (k === curKey ? " cursor" : "");
-    el.textContent = game.showLetter(k) ? game.grid.get(k).letter : "";
+    const i = selCells.indexOf(k), inSel = i >= 0 && playing;
+    el.className = "cell " + game.cellClass(k) + (inSel ? " sel" : "") + (inSel && bossSel ? " bossroom" : "") + (k === curKey ? " cursor" : "") + (k === flashing ? " error" : "");
+    const cell = game.grid.get(k), shown = game.showLetter(k);
+    // Boss letters that crossings already revealed show dimmed, since the boss word must still be typed in full.
+    const dim = !shown && bossSel && i >= 0 && cell.revealed;
+    const ch = chEls.get(k);
+    ch.textContent = shown || dim ? cell.letter : "";
+    ch.classList.toggle("dim", dim);
     el.setAttribute("aria-label", cellLabel(k, roomCells, i >= 0, k === curKey));
     el.tabIndex = k === curKey ? 0 : -1;
     if (k === curKey) el.setAttribute("aria-current", "true"); else el.removeAttribute("aria-current");
@@ -178,20 +248,27 @@ function render() {
   $("h-hp").textContent = `${game.hp}/${RULES.START_HP}`;
   $("h-hpbar").style.width = (100 * game.hp / RULES.START_HP) + "%";
   $("h-ink").textContent = game.ink;
-  $("h-combo").textContent = game.combo + (game.combo >= RULES.COMBO_THRESHOLD ? " ×1.5" : "");
+  $("h-combo").textContent = "×" + game.combo;
+  const comboChip = $("h-combo").parentElement, hot = game.combo >= RULES.COMBO_THRESHOLD;
+  comboChip.dataset.lvl = hot ? "3" : game.combo > 0 ? "1" : "0";
+  comboChip.title = hot ? `Combo ×${game.combo}: every hit lands 1.5×` : "Combo: clean rooms in a row. At 3, every hit lands 1.5×";
   const bs = game.boss.state;
-  $("h-seal").textContent = bs === "sealed" ? `Sealed ${game.solvedNonBoss()}/${game.needed()}` : bs === "open" ? "Awake" : "Slain";
+  $("h-seal").innerHTML = bs === "sealed" ? `<span class="long">Sealed </span>${game.solvedNonBoss()}/${game.needed()}` : bs === "open" ? "Awake" : "Slain";
   $("h-seal").parentElement.dataset.state = bs;
 
   const r = game.sel >= 0 ? game.rooms[game.sel] : null;
-  $("clue").innerHTML = r && playing
-    ? `${r.isBoss ? '<span class="tag">Boss</span>' : ""}<span class="dir">${r.dx ? "Across" : "Down"}</span> ${escapeHtml(r.clue)} <span class="mono muted">(${r.answer.length})</span>`
-    : "";
+  $("clue").textContent = r && playing ? r.clue : "";
+  $("clue-label").textContent = r && playing ? `${r.dx ? "Across" : "Down"} · ${r.answer.length} letters` : "";
+  $("room-tag").textContent = r && playing ? `${r.isBoss ? "Boss room" : "Room"} ${r.id + 1}` : "";
 
   // Enemy panel. A defeated enemy is always drawn at 0 HP, never with the last value it had mid-fight.
   const f = game.fight, k = game.kill;
   const showKill = !f && k && game.status !== "playing";
   $("monster").hidden = !(f || showKill);
+  const isBoss = f ? f.boss : showKill ? k.boss : false;
+  $("room-card").classList.toggle("is-boss", !!isBoss);
+  const sigil = isBoss ? "assets/sigil-boss.svg" : "assets/sigil-monster.svg";
+  if ($("sigil").getAttribute("src") !== sigil) $("sigil").setAttribute("src", sigil);
   if (f) {
     $("m-name").textContent = f.name;
     $("m-bar").style.width = (100 * f.hp / f.max) + "%";
@@ -201,15 +278,15 @@ function render() {
     $("m-bar").style.width = "0%";
     $("m-hp").textContent = `0/${k.max} HP`;
   }
+  updateRooms(playing);
+  updateChronicle();
 
   // Damage rules: mistakes and enemy strikes are separate penalties, each with its own condition.
   $("r-mistake").textContent = `-${RULES.WRONG_LETTER_COST} HP`;
   $("rule-strike").hidden = !f;
   if (f) {
     $("r-strike").textContent = f.hp > 0 ? `-${f.attack} HP` : "none";
-    $("r-strike-when").innerHTML = f.hp > 0
-      ? '<span class="long">only if it is still alive when you finish the word</span><span class="short">if alive when you finish</span>'
-      : '<span class="long">none, it is already down</span><span class="short">none, it is down</span>';
+    $("r-strike-when").textContent = f.hp > 0 ? "if still alive when you finish" : "none, it is down";
   }
 
   // What just cost HP, so the number on the HP bar always has a visible reason.
@@ -225,7 +302,7 @@ function render() {
   }
 
   $("event").textContent = game.event;
-  $("event").dataset.tone = d ? "bad" : "";
+  $("event").dataset.tone = game.eventKind;
   if (d) shake();
   renderOverlay();
 }
@@ -295,7 +372,7 @@ function renderOverlay() {
   ctas.innerHTML = "";
   const stats = $("o-stats"), extra = $("o-extra");
   stats.hidden = true; stats.innerHTML = ""; extra.textContent = "";
-  $("o-note").textContent = ""; $("o-share").hidden = true;
+  $("o-note").textContent = ""; $("o-share").hidden = true; $("o-kicker").textContent = "";
   const btn = (label, fn, ghost) => {
     const b = document.createElement("button");
     b.className = "btn" + (ghost ? " btn-ghost" : "");
@@ -326,12 +403,14 @@ function renderOverlay() {
   };
   if (s === "descend") {
     const k = game.kill;
-    $("o-title").textContent = "Boss defeated";
+    $("o-kicker").textContent = `Floor ${game.floor} cleared`;
+    $("o-title").textContent = "The seal is broken";
     $("o-body").textContent = `${k.name} falls at 0/${k.max} HP. You cleared floor ${game.floor} with ${game.hp} HP and ${game.ink} Ink. Descend to heal ${RULES.FLOOR_HEAL} HP and face a bigger floor.`;
     btn("Descend to floor 2", () => game.descend()).focus();
   } else if (s === "dead") {
     track("demo_death");
-    $("o-title").textContent = `You fell on floor ${game.floor}`;
+    $("o-kicker").textContent = "Your ink runs dry";
+    $("o-title").textContent = `Fallen on floor ${game.floor}`;
     $("o-body").textContent = `${game.ink} Ink gathered. In the full game, that Ink buys permanent perks for your next run.`;
     const sm = showResult();
     btn("Try again", newGame).focus();
@@ -341,6 +420,7 @@ function renderOverlay() {
   } else if (s === "demo_complete") {
     track("demo_complete");
     const k = game.kill;
+    $("o-kicker").textContent = "Daily floor cleared";
     $("o-title").textContent = "Demo complete";
     $("o-body").textContent = `${k.name} falls at 0/${k.max} HP. Three deeper floors, bigger bosses and the Scriptorium are waiting in the full game.`;
     const sm = showResult();

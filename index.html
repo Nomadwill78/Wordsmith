@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Wordsmith's Gambit — A crossword that fights back</title>
 <meta name="description" content="A premium puzzle-roguelite. Every run is a new crossword dungeon. Spell to strike, chain perfect words, break the seal, and slay the boss word. Play today's floor free.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231b1726'/%3E%3Crect x='6' y='13' width='6' height='6' fill='%23d9a441'/%3E%3Crect x='13' y='13' width='6' height='6' fill='%23d9a441'/%3E%3Crect x='20' y='13' width='6' height='6' fill='%23d9a441'/%3E%3Crect x='13' y='6' width='6' height='6' fill='%234a3f6b'/%3E%3Crect x='13' y='20' width='6' height='6' fill='%234a3f6b'/%3E%3C/svg%3E">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="canonical" href="https://wordsmiths-gambit.vercel.app/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Wordsmith's Gambit">
@@ -27,8 +27,9 @@
 <script defer src="/_vercel/insights/script.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=IM+Fell+English:ital@1&family=Spectral:ital,wght@0,600;0,700;1,500&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="tokens.css">
 <link rel="stylesheet" href="play.css">
 </head>
 <body>
@@ -36,13 +37,7 @@
 
 <header class="nav">
   <a href="#" class="brand" aria-label="Wordsmith's Gambit home">
-    <svg class="logo" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-      <rect x="2" y="12" width="8" height="8" rx="1.5" fill="currentColor"/>
-      <rect x="12" y="12" width="8" height="8" rx="1.5" fill="currentColor"/>
-      <rect x="22" y="12" width="8" height="8" rx="1.5" fill="currentColor"/>
-      <rect x="12" y="2" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
-      <rect x="12" y="22" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
-    </svg>
+    <img class="logo" src="assets/logo-mark.svg" alt="" width="26" height="26">
     <span>Wordsmith's Gambit</span>
   </a>
   <nav aria-label="Primary">
@@ -82,36 +77,64 @@
       <div class="hint" id="hint" role="note">
         <p><b>How to play.</b> Type only the blank squares; crossings fill in automatically. A wrong letter costs <span id="hint-cost">2</span> HP. <kbd>Tab</kbd>, <kbd>Next</kbd> or a square switches rooms. <button type="button" class="hint-close" id="hint-close">Got it</button></p>
       </div>
-      <div class="demo-top" id="demo-top">
-        <div class="hud">
-          <div class="stat"><span>Floor</span><b id="h-floor">1/2</b></div>
-          <div class="stat hp"><span>HP</span><b id="h-hp">30</b><i class="meter"><i id="h-hpbar"></i></i><b id="h-delta" class="delta" data-kind="" role="status" hidden></b></div>
-          <div class="stat"><span>Ink</span><b id="h-ink">0</b></div>
-          <div class="stat"><span>Combo</span><b id="h-combo">0</b></div>
-          <div class="stat seal"><span>Boss</span><b id="h-seal">Sealed</b></div>
-          <button type="button" class="hud-btn" id="hint-open" aria-controls="hint" aria-expanded="false" hidden>Rules</button>
-          <p class="daily" id="h-daily"></p>
-        </div>
-        <div class="clue-bar">
-          <p class="clue" id="clue" aria-live="polite"></p>
+      <div class="g-top" id="demo-top">
+        <header class="g-head">
+          <div class="g-brand">
+            <img src="assets/logo-mark.svg" alt="" width="40" height="40">
+            <div><b class="g-title">Wordsmith's Gambit</b><p class="daily" id="h-daily"></p></div>
+          </div>
+          <div class="hud" id="hud">
+            <div class="chip" role="group" aria-label="Floor" title="Floor"><img src="assets/icon-floor.svg" alt="" width="22" height="22"><b id="h-floor">1/2</b></div>
+            <div class="chip chip-hp" role="group" aria-label="Health" title="Health"><img src="assets/icon-hp.svg" alt="" width="22" height="22"><b id="h-hp">30</b><i class="meter"><i id="h-hpbar"></i></i><b id="h-delta" class="delta" data-kind="" role="status" hidden></b></div>
+            <div class="chip" role="group" aria-label="Ink" title="Ink"><img src="assets/icon-ink.svg" alt="" width="22" height="22"><b id="h-ink">0</b></div>
+            <div class="chip chip-combo" role="group" aria-label="Combo" title="Combo: clean rooms in a row" data-lvl="0"><img src="assets/icon-combo.svg" alt="" width="22" height="22"><b id="h-combo">0</b></div>
+            <div class="chip seal" role="group" aria-label="Boss" title="Boss"><img src="assets/icon-seal.svg" alt="" width="22" height="22"><b id="h-seal">Sealed</b></div>
+          </div>
+          <div class="g-actions">
+            <button type="button" class="hud-btn" id="hint-open" aria-controls="hint" aria-expanded="false" hidden>Rules</button>
+            <button type="button" class="hud-btn" id="restart">Restart</button>
+          </div>
+        </header>
+        <aside class="room-card" id="room-card" aria-label="Current room">
+          <p class="room-tag" id="room-tag"></p>
+          <img class="sigil" id="sigil" src="assets/sigil-monster.svg" alt="" width="132" height="132">
           <div class="monster" id="monster" hidden>
-            <span id="m-name"></span>
+            <span id="m-name" class="m-name"></span>
             <i class="meter meter-red"><i id="m-bar"></i></i>
             <span id="m-hp" class="mono"></span>
           </div>
-        </div>
-        <div class="rules" id="rules" aria-label="Damage rules">
-          <span class="rule rule-mistake"><b>Mistake</b> <span class="amt" id="r-mistake">-2 HP</span> <em>for every wrong letter</em></span>
-          <span class="rule rule-strike" id="rule-strike"><b>Enemy strike</b> <span class="amt" id="r-strike"></span> <em id="r-strike-when"></em></span>
+          <div class="ornament" aria-hidden="true"><i></i></div>
+          <div class="clue-box" aria-live="polite" aria-atomic="true">
+            <p class="clue-label" id="clue-label"></p>
+            <p class="clue" id="clue"></p>
+          </div>
+          <div class="rules" id="rules" aria-label="Damage rules">
+            <p class="rule rule-mistake"><span>Mistake</span> <b class="amt" id="r-mistake">-2 HP</b> <em>for every wrong letter</em></p>
+            <p class="rule rule-strike" id="rule-strike"><span>Enemy strike</span> <b class="amt" id="r-strike"></b> <em id="r-strike-when"></em></p>
+            <p class="rule rule-bonus"><span>Clean room</span> <b class="amt">+5 Ink</b> <em>no mistakes</em></p>
+          </div>
+        </aside>
+      </div>
+      <div class="g-center">
+        <div class="board-wrap" id="board-wrap"><div class="board" id="board" role="group" aria-label="Crossword board. Each square is a button; arrow keys move between squares."></div></div>
+        <div class="demo-bottom" id="demo-bottom">
+          <p class="event" id="event" aria-live="polite"></p>
+          <div class="keys" id="keys" aria-label="On-screen keyboard"></div>
         </div>
       </div>
-      <div class="board-wrap" id="board-wrap"><div class="board" id="board" role="group" aria-label="Crossword board. Each square is a button; arrow keys move between squares."></div></div>
-      <div class="demo-bottom" id="demo-bottom">
-        <p class="event" id="event" aria-live="polite"></p>
-        <div class="keys" id="keys" aria-label="On-screen keyboard"></div>
+      <div class="g-side">
+        <section class="panel rooms-panel" aria-labelledby="rooms-h">
+          <h3 class="panel-h" id="rooms-h">Rooms on this floor</h3>
+          <ul class="room-list" id="rooms"></ul>
+        </section>
+        <section class="panel chronicle-panel" aria-labelledby="chron-h">
+          <h3 class="panel-h" id="chron-h">Chronicle</h3>
+          <ol class="log" id="chronicle"></ol>
+        </section>
       </div>
       <div class="overlay" id="overlay" hidden>
         <div class="overlay-card" role="dialog" aria-labelledby="o-title">
+          <p class="o-kicker" id="o-kicker"></p>
           <h3 id="o-title"></h3>
           <p id="o-body"></p>
           <dl class="o-stats" id="o-stats" hidden></dl>
