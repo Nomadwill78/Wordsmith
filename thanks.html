@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Thank you — Wordsmith's Gambit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Instrument+Sans:wght@400;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+[hidden]{display:none!important}
+html,body{min-height:100%;background-color:#16121f}
+body{min-height:100vh}
+.thanks{max-width:620px;margin:0 auto;padding:clamp(64px,12vh,140px) 24px;text-align:center}
+.thanks h1{font-family:Fraunces,serif;font-size:clamp(2.2rem,6vw,3.4rem);margin:.2em 0 .4em}
+.thanks p{color:#b9b0cc;line-height:1.6}
+.thanks .btn{margin:28px auto 12px;display:inline-flex}
+</style>
+</head><body>
+<main class="thanks">
+  <p class="eyebrow">Payment received</p>
+  <h1>Welcome to the Scriptorium.</h1>
+  <p id="t-body">Thank you for buying Wordsmith's Gambit. Stripe has emailed you a receipt.</p>
+  <a id="t-dl" class="btn" href="#" hidden>Download the game</a>
+  <p id="t-help" class="fine"></p>
+  <p class="fine"><a href="./">Back to the site</a></p>
+</main>
+<script type="module">
+import { STORE } from "./js/config.js";
+const tier = new URLSearchParams(location.search).get("tier") === "supporter" ? "supporter" : "base";
+const p = STORE.products[tier], dl = STORE.downloads?.[tier];
+document.getElementById("t-body").textContent = `Thank you for buying ${p.name}. Stripe has emailed you a receipt.` + (tier === "supporter" ? " Your art book and soundtrack are included in the download, and your name goes in the credits." : "");
+if (dl) { const a = document.getElementById("t-dl"); a.href = dl; a.hidden = false; }
+const help = STORE.supportEmail ? `Trouble downloading? Email ${STORE.supportEmail} with your receipt.` : "Trouble downloading? Reply to your Stripe receipt and we'll sort it out.";
+document.getElementById("t-help").textContent = dl ? help : "Your download link is on its way by email. " + help;
+</script>
+</body></html>

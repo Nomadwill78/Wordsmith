@@ -1,0 +1,109 @@
+/* Play-area fixes: loaded after style.css.
+   New body text here stays at 1rem (12pt) or larger. */
+
+:root { --vh: 100vh; --nav-h: 76px; }
+@supports (height: 100dvh) { :root { --vh: 100dvh; } }
+html { scroll-padding-top: var(--nav-h); }
+
+/* [hidden] must win over the display rules below (this is what left the enemy panel stuck on screen). */
+.monster[hidden], .hint[hidden], .rule[hidden], .hud-btn[hidden], .delta[hidden], .o-stats[hidden], .o-share[hidden] { display: none !important; }
+
+/* ---------- Play panel: always fits the viewport; only the board scrolls ---------- */
+.demo { display: flex; flex-direction: column; max-height: calc(var(--vh) - 84px); min-height: 340px; overflow-y: auto; }
+.demo > * { flex: none; }
+.demo > .board-wrap { flex: 1 1 auto; min-height: 84px; overflow: auto; align-items: flex-start; overscroll-behavior: contain; padding: 12px 0 8px; }
+.board {
+  --chrome: 400px;
+  --cell: clamp(18px,
+    min((min(100vw, 1160px) - 110px - var(--gap) * var(--cols)) / var(--cols),
+        (var(--vh) - var(--chrome) - var(--gap) * var(--rows)) / var(--rows)),
+    44px);
+}
+
+/* ---------- HUD ---------- */
+.hud { align-items: center; }
+.hud .delta { font: 600 1rem var(--font-mono); }
+.delta[data-kind="mistake"] { color: #ff8f89; }
+.delta[data-kind="strike"] { color: #ffb86b; }
+.hud-btn { font: 600 1rem var(--font-body); color: var(--gold-2); background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 2px 12px; cursor: pointer; }
+.hud-btn:hover { background: var(--surface); }
+.daily { flex-basis: 100%; margin: 0; font-size: 1rem; line-height: 1.35; color: var(--muted); }
+
+/* ---------- First-run hint ---------- */
+.hint { margin: 0 0 8px; padding: 8px 12px; border: 1px solid var(--gold); border-radius: var(--r); background: rgba(217,164,65,.09); font-size: 1rem; line-height: 1.45; }
+.hint b { color: var(--gold-2); }
+.hint kbd { font-size: .9rem; }
+.hint-close { margin-left: 6px; font: 600 1rem var(--font-body); color: #1b1726; background: var(--gold); border: 0; border-radius: 999px; padding: 3px 14px; cursor: pointer; }
+.hint-close:hover { background: var(--gold-2); }
+
+/* ---------- Enemy panel + damage rules ---------- */
+.monster { font-size: 1rem; }
+.monster .mono { font-size: 1rem; }
+.rules { display: flex; flex-wrap: wrap; gap: 6px 10px; margin: 0 0 4px; font-size: 1rem; line-height: 1.3; }
+.rule { display: inline-flex; flex-wrap: wrap; gap: 2px 7px; align-items: baseline; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); }
+.rule b { font-weight: 600; }
+.rule .amt { font: 600 1rem var(--font-mono); }
+.rule em { font-style: normal; color: var(--muted); }
+.rule .short { display: none; }
+.rule-mistake .amt { color: #ff8f89; }
+.rule-strike .amt { color: #ffb86b; }
+.event { font-size: 1rem; }
+
+/* ---------- Result card ---------- */
+.overlay { display: flex; overflow: auto; }
+.overlay-card { margin: auto; width: 100%; max-width: 480px; }
+.o-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 14px; margin: 0 0 14px; text-align: left; }
+.o-stats dt { font-size: 1rem; color: var(--muted); }
+.o-stats dd { margin: 0; font: 600 1.15rem var(--font-mono); overflow-wrap: anywhere; }
+.o-extra { color: var(--muted) !important; margin-bottom: 14px !important; font-size: 1rem; }
+.o-share { width: 100%; margin-bottom: 12px; font: 400 1rem/1.4 var(--font-mono); color: var(--text); background: var(--bg-2); border: 1px solid var(--line); border-radius: 8px; padding: 8px; resize: none; }
+.o-note { min-height: 1.4em; margin-bottom: 12px !important; font-size: 1rem; color: var(--gold-2) !important; }
+.demo-help { font-size: 1rem; }
+
+/* ---------- Short viewports (laptops with toolbars, landscape phones) ---------- */
+@media (max-height: 760px) {
+  .demo { padding: 10px 14px; }
+  .hud { padding-bottom: 6px; gap: 4px 22px; }
+  .hint { margin-bottom: 6px; padding: 5px 10px; }
+  .clue-bar { min-height: 0; padding: 8px 0 6px; gap: 6px 20px; }
+  .clue { font-size: 1.15rem; }
+  .rules { margin-bottom: 2px; }
+  .rule { padding: 2px 10px; }
+  .event { margin: 2px 0 6px; min-height: 1.3em; }
+  .keys { gap: 4px; }
+  .key-row { gap: 4px; }
+  .key { height: 34px; font-size: .85rem; }
+  .key-wide { font-size: .8rem; }
+  .overlay { padding: 8px; }
+  .overlay-card { padding: 16px 18px; }
+  .overlay-card h3 { margin-bottom: 8px; }
+  .overlay-card p { margin-bottom: 10px; }
+  .o-stats { margin-bottom: 8px; gap: 6px 12px; }
+}
+@media (max-height: 760px) { .board { --chrome: 340px; } }
+
+/* ---------- Narrow screens: the page scrolls; header and keyboard stay pinned around the board ---------- */
+.daily .long { display: inline; }
+@media (max-width: 640px) {
+  .daily .long, .rule .long { display: none; }
+  .rule .short { display: inline; }
+  .meter { width: 56px; }
+  .monster .meter { width: auto; }
+  .demo { padding: 10px; border-radius: 14px; max-height: none; min-height: 0; overflow: visible; }
+  .demo-top { position: sticky; top: var(--nav-h); z-index: 5; background: var(--bg-2); padding-top: 2px; box-shadow: 0 10px 10px -10px rgba(0,0,0,.7); }
+  .demo > .board-wrap { flex: none; min-height: 0; overflow-x: auto; overflow-y: visible; padding: 10px 0 8px; }
+  .demo-bottom { position: sticky; bottom: 0; z-index: 5; background: var(--bg-2); padding-top: 2px; box-shadow: 0 -10px 10px -10px rgba(0,0,0,.7); }
+  .hud { gap: 4px 14px; padding-bottom: 6px; }
+  .clue-bar { min-height: 0; padding: 8px 0 4px; gap: 4px 12px; }
+  .clue { font-size: 1.1rem; }
+  .rules { gap: 4px 8px; }
+  .rule { border-radius: 12px; padding: 2px 10px; }
+  .event { margin: 4px 0; min-height: 1.3em; line-height: 1.3; }
+  .key-row { gap: 3px; }
+  .key { height: 38px; max-width: none; }
+  .keys { gap: 4px; padding-bottom: 2px; }
+  /* Result card becomes a full-screen sheet so it is never off-screen on a tall page */
+  .overlay { position: fixed; inset: 0; z-index: 40; border-radius: 0; }
+  .o-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .board { --chrome: 520px; }
+}

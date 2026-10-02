@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wordsmith's Gambit — A crossword that fights back</title>
+<meta name="description" content="A premium puzzle-roguelite. Every run is a new crossword dungeon. Spell to strike, chain perfect words, break the seal, and slay the boss word. Play today's floor free.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231b1726'/%3E%3Crect x='6' y='13' width='6' height='6' fill='%23d9a441'/%3E%3Crect x='13' y='13' width='6' height='6' fill='%23d9a441'/%3E%3Crect x='20' y='13' width='6' height='6' fill='%23d9a441'/%3E%3Crect x='13' y='6' width='6' height='6' fill='%234a3f6b'/%3E%3Crect x='13' y='20' width='6' height='6' fill='%234a3f6b'/%3E%3C/svg%3E">
+<link rel="canonical" href="https://wordsmiths-gambit.vercel.app/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Wordsmith's Gambit">
+<meta property="og:url" content="https://wordsmiths-gambit.vercel.app/">
+<meta property="og:title" content="Wordsmith's Gambit — A crossword that fights back">
+<meta property="og:description" content="A puzzle-roguelite where every run is a new crossword dungeon. Spell to strike, slay the boss word. Play today's floor free.">
+<meta property="og:image" content="https://wordsmiths-gambit.vercel.app/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Wordsmith's Gambit: A crossword that fights back. A boss fight on a crossword grid.">
+<meta property="og:video" content="https://wordsmiths-gambit.vercel.app/assets/trailer.mp4">
+<meta property="og:video:type" content="video/mp4">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Wordsmith's Gambit — A crossword that fights back">
+<meta name="twitter:description" content="Every run is a new crossword dungeon. Play today's floor free.">
+<meta name="twitter:image" content="https://wordsmiths-gambit.vercel.app/assets/og.png">
+<meta name="theme-color" content="#16121f">
+<script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
+<script defer src="/_vercel/insights/script.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="play.css">
+</head>
+<body>
+<a class="skip" href="#game">Skip to the demo</a>
+
+<header class="nav">
+  <a href="#" class="brand" aria-label="Wordsmith's Gambit home">
+    <svg class="logo" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+      <rect x="2" y="12" width="8" height="8" rx="1.5" fill="currentColor"/>
+      <rect x="12" y="12" width="8" height="8" rx="1.5" fill="currentColor"/>
+      <rect x="22" y="12" width="8" height="8" rx="1.5" fill="currentColor"/>
+      <rect x="12" y="2" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+      <rect x="12" y="22" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+    </svg>
+    <span>Wordsmith's Gambit</span>
+  </a>
+  <nav aria-label="Primary">
+    <a href="#game">Play free</a>
+    <a href="#how">How it plays</a>
+    <a href="#buy">Buy</a>
+    <a href="#faq">FAQ</a>
+  </nav>
+  <a href="#buy" class="btn btn-small">Buy — $9.99</a>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="hero-copy">
+      <p class="eyebrow">A puzzle-roguelite for people who finish the Sunday crossword in pen</p>
+      <h1>A crossword<br>that fights back.</h1>
+      <p class="lede">Every run carves a new crossword into a dungeon. Each word is a room with a monster inside. Spell it right to strike. Miss a letter and you bleed. Break the seal, then face the longest word on the floor.</p>
+      <div class="hero-ctas">
+        <a href="#game" class="btn" data-track="demo_cta">Play today's free demo</a>
+        <button type="button" class="btn btn-ghost" data-buy="base">Buy — $9.99</button>
+      </div>
+      <p class="fine">The demo runs in your browser with no sign-up. The daily floor resets at 00:00 UTC, and the game shows that time in your own time zone. The full game is a download for Windows, macOS and Linux.</p>
+    </div>
+    <figure class="hero-shot">
+      <video src="assets/trailer.mp4" poster="assets/poster.jpg" width="1020" height="896" autoplay muted loop playsinline preload="metadata"
+        aria-label="25 seconds of gameplay: solving crossword rooms, a wrong letter costing HP, defeating two bosses."></video>
+      <figcaption class="mono">Real gameplay · floors 1–2 of today's demo</figcaption>
+    </figure>
+  </section>
+
+  <section id="demo" class="demo-section" aria-labelledby="demo-title">
+    <div class="demo-head">
+      <h2 id="demo-title">Today's Daily Floor</h2>
+      <p id="demo-date" class="muted"></p>
+    </div>
+    <div class="demo" id="game" tabindex="0" aria-label="Wordsmith's Gambit demo. Type letters to solve the selected word. Tab switches rooms, arrow keys move between squares, Escape leaves the game.">
+      <div class="hint" id="hint" role="note">
+        <p><b>How to play.</b> Type only the blank squares; crossings fill in automatically. A wrong letter costs <span id="hint-cost">2</span> HP. <kbd>Tab</kbd>, <kbd>Next</kbd> or a square switches rooms. <button type="button" class="hint-close" id="hint-close">Got it</button></p>
+      </div>
+      <div class="demo-top" id="demo-top">
+        <div class="hud">
+          <div class="stat"><span>Floor</span><b id="h-floor">1/2</b></div>
+          <div class="stat hp"><span>HP</span><b id="h-hp">30</b><i class="meter"><i id="h-hpbar"></i></i><b id="h-delta" class="delta" data-kind="" role="status" hidden></b></div>
+          <div class="stat"><span>Ink</span><b id="h-ink">0</b></div>
+          <div class="stat"><span>Combo</span><b id="h-combo">0</b></div>
+          <div class="stat seal"><span>Boss</span><b id="h-seal">Sealed</b></div>
+          <button type="button" class="hud-btn" id="hint-open" aria-controls="hint" aria-expanded="false" hidden>Rules</button>
+          <p class="daily" id="h-daily"></p>
+        </div>
+        <div class="clue-bar">
+          <p class="clue" id="clue" aria-live="polite"></p>
+          <div class="monster" id="monster" hidden>
+            <span id="m-name"></span>
+            <i class="meter meter-red"><i id="m-bar"></i></i>
+            <span id="m-hp" class="mono"></span>
+          </div>
+        </div>
+        <div class="rules" id="rules" aria-label="Damage rules">
+          <span class="rule rule-mistake"><b>Mistake</b> <span class="amt" id="r-mistake">-2 HP</span> <em>for every wrong letter</em></span>
+          <span class="rule rule-strike" id="rule-strike"><b>Enemy strike</b> <span class="amt" id="r-strike"></span> <em id="r-strike-when"></em></span>
+        </div>
+      </div>
+      <div class="board-wrap" id="board-wrap"><div class="board" id="board" role="group" aria-label="Crossword board. Each square is a button; arrow keys move between squares."></div></div>
+      <div class="demo-bottom" id="demo-bottom">
+        <p class="event" id="event" aria-live="polite"></p>
+        <div class="keys" id="keys" aria-label="On-screen keyboard"></div>
+      </div>
+      <div class="overlay" id="overlay" hidden>
+        <div class="overlay-card" role="dialog" aria-labelledby="o-title">
+          <h3 id="o-title"></h3>
+          <p id="o-body"></p>
+          <dl class="o-stats" id="o-stats" hidden></dl>
+          <p class="o-extra" id="o-extra"></p>
+          <textarea id="o-share" class="o-share" readonly rows="4" hidden aria-label="Result text to copy"></textarea>
+          <p class="o-note" id="o-note" aria-live="polite"></p>
+          <div class="overlay-ctas" id="o-ctas"></div>
+        </div>
+      </div>
+    </div>
+    <p class="demo-help muted">Type on your keyboard or tap the keys. <kbd>Tab</kbd> switches rooms, arrow keys move between squares, <kbd>Esc</kbd> leaves the game. <span class="legend"><i class="sw open"></i>open <i class="sw solved"></i>solved <i class="sw boss"></i>boss <i class="sw locked"></i>locked</span></p>
+  </section>
+
+  <section id="how" class="how" aria-labelledby="how-title">
+    <h2 id="how-title">How a run plays</h2>
+    <ol class="steps">
+      <li>
+        <span class="step-n mono">01</span>
+        <h3>Pick a room</h3>
+        <p>Every word on the grid is a room. Words that cross ones you've solved open up. Choose your path through the floor.</p>
+      </li>
+      <li>
+        <span class="step-n mono">02</span>
+        <h3>Spell to strike</h3>
+        <p>Each correct letter hits harder than the last. Clear a room without a mistake to build your combo. At three, every hit lands at 1.5×.</p>
+      </li>
+      <li>
+        <span class="step-n mono">03</span>
+        <h3>Break the seal</h3>
+        <p>Solve 60% of the floor to wake the boss, always the longest word. Crossings won't save you. Bosses must be spelled in full.</p>
+      </li>
+      <li>
+        <span class="step-n mono">04</span>
+        <h3>Descend and grow</h3>
+        <p>Five floors, each bigger than the last. Bank your Ink between runs and buy permanent perks in the Scriptorium.</p>
+      </li>
+    </ol>
+  </section>
+
+  <section class="features" aria-label="What's in the full game">
+    <div class="feature">
+      <h3>A new dungeon every run</h3>
+      <p>Floors are built from a hand-written bank of words and clues. No two runs share a map.</p>
+    </div>
+    <div class="feature">
+      <h3>The same daily run for everyone</h3>
+      <p>Today's seed is identical worldwide. Compare scores with friends and see who spelled cleanest.</p>
+    </div>
+    <div class="feature">
+      <h3>Progress that sticks</h3>
+      <p>Five perks, ten levels. Thick Skin, Sharp Quill, Second Wind, Steady Hand, Ink Well.</p>
+      <img src="assets/shop.png" loading="lazy" width="1280" height="720" alt="The Scriptorium perk shop after a run, showing banked Ink and five perks with prices.">
+    </div>
+    <div class="feature">
+      <h3>Yours to keep</h3>
+      <p>No DRM, no ads, no energy meters. Buy once, download for Windows, macOS and Linux, and play offline.</p>
+    </div>
+  </section>
+
+  <section id="buy" class="buy" aria-labelledby="buy-title">
+    <h2 id="buy-title">Own the full game</h2>
+    <p class="muted center">Buy directly from the developer. More of your money reaches the person who made it.</p>
+    <div class="tiers">
+      <article class="tier">
+        <h3>Wordsmith's Gambit</h3>
+        <p class="price"><span class="mono">$9.99</span></p>
+        <ul>
+          <li>The full game: 5 floors per run, endless runs</li>
+          <li>Daily run with a worldwide seed</li>
+          <li>All five Scriptorium perks</li>
+          <li>Windows, macOS and Linux, DRM-free</li>
+          <li>Free updates to version 1.x</li>
+        </ul>
+        <button class="btn btn-block" data-buy="base">Buy now</button>
+      </article>
+      <article class="tier tier-featured">
+        <p class="badge">Best for fans</p>
+        <h3>Supporter Edition</h3>
+        <p class="price"><span class="mono">$29.99</span></p>
+        <ul>
+          <li>Everything in the base game</li>
+          <li>Digital art book (PDF)</li>
+          <li>Original soundtrack (MP3 + FLAC)</li>
+          <li>Your name in the credits</li>
+          <li>Early access to new word packs</li>
+        </ul>
+        <button class="btn btn-block" data-buy="supporter">Buy Supporter Edition</button>
+      </article>
+    </div>
+    <p class="fine center">Secure checkout by Stripe. Pay with a card, Apple Pay or Google Pay, and your download link appears as soon as payment clears, with a receipt sent by email.</p>
+  </section>
+
+    <section class="waitlist" id="signup" aria-labelledby="wl-title">
+    <h2 id="wl-title">Get new word packs and the weekly seed</h2>
+    <p class="muted">One email a week: a hand-picked seed to race your friends on, plus news when new word packs land. Unsubscribe anytime.</p>
+    <form id="waitlist-form" class="wl-form">
+      <label for="wl-email" class="sr-only">Email address</label>
+      <input id="wl-email" type="email" required placeholder="you@example.com" autocomplete="email">
+      <button class="btn" type="submit">Send me the seed</button>
+    </form>
+    <p id="wl-msg" class="fine" aria-live="polite"></p>
+  </section>
+
+  <section id="faq" class="faq" aria-labelledby="faq-title">
+    <h2 id="faq-title">Questions</h2>
+    <details>
+      <summary>Is the full game different from the demo?</summary>
+      <p>The demo is today's first two floors. The full game has five floors per run, unlimited new runs, save and resume, and the Scriptorium perk shop that carries progress between runs.</p>
+    </details>
+    <details>
+      <summary>Do I need to be good at crosswords?</summary>
+      <p>No. Clues are straightforward, and crossing letters give you hints. The challenge is spelling cleanly under pressure, not trivia.</p>
+    </details>
+    <details>
+      <summary>Is it on Steam?</summary>
+      <p>Not right now. It's sold only here so the developer keeps more of each sale and can email buyers directly about updates.</p>
+    </details>
+    <details>
+      <summary>What about refunds?</summary>
+      <p>If the game doesn't run on your computer, email within 14 days for a full refund.</p>
+    </details>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <p>© 2026 Wordsmith's Gambit. Made by one developer and a lot of words.</p>
+</footer>
+
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
