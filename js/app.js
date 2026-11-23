@@ -504,6 +504,7 @@ new IntersectionObserver(([en]) => { if (en.isIntersecting && document.activeEle
 
 // ---------- Checkout ----------
 function openCheckout(tier) {
+  if (!STORE.checkoutEnabled) { location.hash = "#buy"; return; }
   const p = STORE.products[tier];
   track("buy_" + tier, { tier }, false);
   if (!p?.checkoutUrl) { location.hash = "#buy"; return; }
