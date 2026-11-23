@@ -17,20 +17,10 @@ body{min-height:100vh}
 </style>
 </head><body>
 <main class="thanks">
-  <p class="eyebrow">Payment received</p>
-  <h1>Welcome to the Scriptorium.</h1>
-  <p id="t-body">Thank you for buying Wordsmith's Gambit. Stripe has emailed you a receipt.</p>
-  <a id="t-dl" class="btn" href="#" hidden>Download the game</a>
-  <p id="t-help" class="fine"></p>
-  <p class="fine"><a href="./">Back to the site</a></p>
+  <p class="eyebrow">Purchase status unavailable</p>
+  <h1>Purchases are currently disabled.</h1>
+  <p>This page does not verify a payment or promise a download. If you previously paid, contact support with your receipt so your order can be checked.</p>
+  <p><a href="mailto:nomadconsulting7@gmail.com">Contact support</a></p>
+  <p><a href="./">Return to the free demo</a></p>
 </main>
-<script type="module">
-import { STORE } from "./js/config.js";
-const tier = new URLSearchParams(location.search).get("tier") === "supporter" ? "supporter" : "base";
-const p = STORE.products[tier], dl = STORE.downloads?.[tier];
-document.getElementById("t-body").textContent = `Thank you for buying ${p.name}. Stripe has emailed you a receipt.` + (tier === "supporter" ? " Your art book and soundtrack are included in the download, and your name goes in the credits." : "");
-if (dl) { const a = document.getElementById("t-dl"); a.href = dl; a.hidden = false; }
-const help = STORE.supportEmail ? `Trouble downloading? Email ${STORE.supportEmail} with your receipt.` : "Trouble downloading? Reply to your Stripe receipt and we'll sort it out.";
-document.getElementById("t-help").textContent = dl ? help : "Your download link is on its way by email. " + help;
-</script>
 </body></html>
